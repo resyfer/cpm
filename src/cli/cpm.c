@@ -2,9 +2,9 @@
 
 /*
 
-cpm.build:
+.cpm:
 [global]
-policy = 0.1
+policy = 1
 type = lib-static / lib-dynamic / bin
 headers = /path1, /path2, ...
 src = /path1, /path2, ...
@@ -45,6 +45,7 @@ dependents = <count>
 #include <args.h>
 #include <help.h>
 #include <version.h>
+#include <init.h>
 
 int
 main(int argc, char **argv)
@@ -58,6 +59,10 @@ main(int argc, char **argv)
 	} else if (arguments.version) {
 		version();
 		return 0;
+	}
+
+	if (arguments.init) {
+		init();
 	}
 
 	return 0;
