@@ -1,5 +1,5 @@
-#ifndef __GLOBAL_H
-#define __GLOBAL_H
+#ifndef __CPM_LOBAL_H
+#define __CPM_LOBAL_H
 
 #include <stdbool.h>
 

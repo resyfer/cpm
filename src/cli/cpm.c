@@ -43,24 +43,22 @@ dependents = <count>
 #include <stdio.h>
 
 #include <args.h>
+#include <help.h>
+#include <version.h>
 
 int
 main(int argc, char **argv)
 {
 
-	printf("Hello World\n");
-
 	parse_cli_args(argc, argv);
 
-	printf("Version: %d\n", arguments.version);
-	printf("Help: %d\n", arguments.help);
-	printf("Init: %d\n", arguments.init);
-
-	printf("Add: ");
-	for (int i = 0; i < arguments.n_add; i++) {
-		printf("%s ", arguments.add[i]);
+	if (arguments.help) {
+		help();
+		return 0;
+	} else if (arguments.version) {
+		version();
+		return 0;
 	}
-	printf("\n");
 
 	return 0;
 }

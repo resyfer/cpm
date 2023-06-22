@@ -1,5 +1,5 @@
-#ifndef __ARGS_H
-#define __ARGS_H
+#ifndef __CPM_ARGS_H
+#define __CPM_ARGS_H
 
 #include <stdbool.h>
 
