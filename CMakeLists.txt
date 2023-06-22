@@ -11,3 +11,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -O2")
 
 add_executable(cli ${CLI_SRC_FILES} ${CLI_HDR_FILES})
 include_directories(cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/cli")
+
+add_custom_target(
+  format
+  COMMAND cd .. && indent ${CLI_SRC_FILES} ${CLI_HDR_FILES} && cd ${CMAKE_BINARY_DIR} && rm -f "${CMAKE_CURRENT_SOURCE_DIR}/**/**/*.{c,h}~*"
+)

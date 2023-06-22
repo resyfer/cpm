@@ -27,11 +27,10 @@ $ cpm run
 args_t arguments;
 
 void
-parse_cli_args(int argc, char** argv)
+parse_cli_args(int argc, char **argv)
 {
 	int c, option_index;
-	struct option long_options[] =
-	{
+	struct option long_options[] = {
 		{"version", no_argument, NULL, 'v'},
 		{"help", no_argument, NULL, 'h'},
 		{"init", no_argument, NULL, 'x'},
@@ -50,125 +49,135 @@ parse_cli_args(int argc, char** argv)
 
 	memset(&arguments, 0, sizeof(args_t));
 
-	while((c = getopt_long(argc, argv, "vhxgya:f:l:r:s:cbru:", long_options, &option_index)) != -1) {
+	while ((c =
+		getopt_long(argc, argv, "vhxgya:f:l:r:s:cbru:", long_options,
+			    &option_index)) != -1) {
 
-		if(c == -1) {
+		if (c == -1) {
 			break;
 		}
 
-		switch(c) {
-			case 'v':
-				arguments.version = true;
-				break;
+		switch (c) {
+		case 'v':
+			arguments.version = true;
+			break;
 
-			case 'h':
-				arguments.help = true;
-				break;
+		case 'h':
+			arguments.help = true;
+			break;
 
-			case 'x':
-				arguments.init = true;
-				break;
+		case 'x':
+			arguments.init = true;
+			break;
 
-			case 'g':
-				arguments.global = true;
-				break;
+		case 'g':
+			arguments.global = true;
+			break;
 
-			case 'y':
-				arguments.yes = true;
-				break;
+		case 'y':
+			arguments.yes = true;
+			break;
 
-			case 'a':
+		case 'a':
+			optind--;
+			while (optind < argc && argv[optind][0] != '-') {
+				arguments.n_add++;
+				arguments.add = realloc(arguments.add,
+							arguments.n_add *
+							sizeof(char *));
+				arguments.add[arguments.n_add - 1] =
+				    argv[optind];
+				optind++;
+			}
+			if (arguments.n_add) {
 				optind--;
-				while(optind < argc && argv[optind][0] != '-') {
-					arguments.n_add++;
-					arguments.add = realloc(arguments.add,
-											arguments.n_add * sizeof(char*));
-					arguments.add[arguments.n_add - 1] = argv[optind];
-					optind++;
-				}
-				if(arguments.n_add) {
-					optind--;
-				} else {
-					arguments.help = true;
-					goto exit_args;
-				}
-				break;
-
-			case 'f':
-				optind--;
-				while(optind < argc && argv[optind][0] != '-') {
-					arguments.n_find++;
-					arguments.find = realloc(arguments.find,
-											arguments.n_find * sizeof(char*));
-					arguments.find[arguments.n_find - 1] = argv[optind];
-					optind++;
-				}
-				if(arguments.n_find) {
-					optind--;
-				} else {
-					arguments.help = true;
-					goto exit_args;
-				}
-				break;
-
-			case 'l':
-				arguments.ld = true;
-				break;
-
-			case 'd':
-				optind--;
-				while(optind < argc && argv[optind][0] != '-') {
-					arguments.n_remove++;
-					arguments.remove = realloc(arguments.remove,
-											arguments.n_remove * sizeof(char*));
-					arguments.remove[arguments.n_remove - 1] = argv[optind];
-					optind++;
-				}
-				if(arguments.n_remove) {
-					optind--;
-				} else {
-					arguments.help = true;
-					goto exit_args;
-				}
-				break;
-
-			case 'c':
-				arguments.clean = true;
-				break;
-
-			case 'b':
-				arguments.build = true;
-				break;
-
-			case 'r':
-				arguments.run = true;
-				break;
-
-			case 'u':
-				optind--;
-				while(optind < argc && argv[optind][0] != '-') {
-					arguments.n_update++;
-					arguments.update = realloc(arguments.update,
-											arguments.n_update * sizeof(char*));
-					arguments.update[arguments.n_update - 1] = argv[optind];
-					optind++;
-				}
-				if(arguments.n_update) {
-					optind--;
-				} else {
-					arguments.help = true;
-					goto exit_args;
-				}
-				break;
-
-			default:
-				printf("Option %c required argument\n", optopt);
+			} else {
 				arguments.help = true;
 				goto exit_args;
+			}
+			break;
+
+		case 'f':
+			optind--;
+			while (optind < argc && argv[optind][0] != '-') {
+				arguments.n_find++;
+				arguments.find = realloc(arguments.find,
+							 arguments.n_find *
+							 sizeof(char *));
+				arguments.find[arguments.n_find - 1] =
+				    argv[optind];
+				optind++;
+			}
+			if (arguments.n_find) {
+				optind--;
+			} else {
+				arguments.help = true;
+				goto exit_args;
+			}
+			break;
+
+		case 'l':
+			arguments.ld = true;
+			break;
+
+		case 'd':
+			optind--;
+			while (optind < argc && argv[optind][0] != '-') {
+				arguments.n_remove++;
+				arguments.remove = realloc(arguments.remove,
+							   arguments.n_remove *
+							   sizeof(char *));
+				arguments.remove[arguments.n_remove - 1] =
+				    argv[optind];
+				optind++;
+			}
+			if (arguments.n_remove) {
+				optind--;
+			} else {
+				arguments.help = true;
+				goto exit_args;
+			}
+			break;
+
+		case 'c':
+			arguments.clean = true;
+			break;
+
+		case 'b':
+			arguments.build = true;
+			break;
+
+		case 'r':
+			arguments.run = true;
+			break;
+
+		case 'u':
+			optind--;
+			while (optind < argc && argv[optind][0] != '-') {
+				arguments.n_update++;
+				arguments.update = realloc(arguments.update,
+							   arguments.n_update *
+							   sizeof(char *));
+				arguments.update[arguments.n_update - 1] =
+				    argv[optind];
+				optind++;
+			}
+			if (arguments.n_update) {
+				optind--;
+			} else {
+				arguments.help = true;
+				goto exit_args;
+			}
+			break;
+
+		default:
+			printf("Option %c required argument\n", optopt);
+			arguments.help = true;
+			goto exit_args;
 
 		}
 	}
 
-exit_args:
-	; // Empty statement to keep linters happy about the goto at the end of function
+ exit_args:
+	;			// Empty statement to keep linters happy about the goto at the end of function
 }

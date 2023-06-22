@@ -44,7 +44,9 @@ dependents = <count>
 
 #include <args.h>
 
-int main(int argc, char** argv) {
+int
+main(int argc, char **argv)
+{
 
 	printf("Hello World\n");
 
@@ -55,11 +57,10 @@ int main(int argc, char** argv) {
 	printf("Init: %d\n", arguments.init);
 
 	printf("Add: ");
-	for(int i = 0; i < arguments.n_add; i++) {
+	for (int i = 0; i < arguments.n_add; i++) {
 		printf("%s ", arguments.add[i]);
 	}
 	printf("\n");
-
 
 	return 0;
 }
