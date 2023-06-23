@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-typedef struct args {
+typedef struct {
 	bool help;
 	bool version;
 	bool init;

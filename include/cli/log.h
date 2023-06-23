@@ -3,5 +3,6 @@
 
 void error(const char *format, ...);
 void warning(const char *format, ...);
+void logger(const char *format, ...);
 
 #endif

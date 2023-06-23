@@ -29,6 +29,17 @@ error(const char *format, ...)
 	va_end(args);
 }
 
+void
+logger(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+
+	print_log("LOG", format, args);
+
+	va_end(args);
+}
+
 static void
 print_log(const char *prefix, const char *format, va_list args)
 {

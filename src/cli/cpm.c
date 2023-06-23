@@ -6,22 +6,21 @@
 [global]
 policy = 1
 type = lib-static / lib-dynamic / bin
-headers = /path1, /path2, ...
-src = /path1, /path2, ...
+headers = /path1,/path2, ...
+src = /path1,/path2, ...
 out = outname // libraries are named as liboutname, and bin are named as outname
 
 [dependencies]
-<pkg>:<ver> = 0.0.5 // Fixed version
-<pkg>:<ver> = ^0.0.5 // 0.0.x, x >= 5, patches only, default
-<pkg>:<ver> = ~0.0.5 // 0.x.y, minor fixes only
-<pkg>:<ver> = * // Latest
-<pkg>:<ver> = <0.0.5, // version < 0.0.5
+<pkg> = 0.0.5 // Fixed version
+<pkg> = ^0.0.5 // 0.0.x, x >= 5, patches only, default
+<pkg> = ~0.0.5 // 0.x.y, minor fixes only
+<pkg> = * // Latest
 
 [versions]
-0.0.1 = <commit-hash> or <branch>
-0.0.2 = <commit-hash> or <branch>
-1.0.0 = <commit-hash> or <branch>
-1.0.1 = <commit-hash> or <branch>
+0.0.1 = <commit-full-hash>
+0.0.2 = <commit-full-hash>
+1.0.0 = <commit-full-hash>
+1.0.1 = <commit-full-hash>
 
 */
 
@@ -43,9 +42,10 @@ dependents = <count>
 #include <stdio.h>
 
 #include <args.h>
+#include <config.h>
 #include <help.h>
-#include <version.h>
 #include <init.h>
+#include <version.h>
 
 int
 main(int argc, char **argv)
@@ -63,6 +63,8 @@ main(int argc, char **argv)
 
 	if (arguments.init) {
 		init();
+	} else {
+		load_config();
 	}
 
 	return 0;
