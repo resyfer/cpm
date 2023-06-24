@@ -26,6 +26,7 @@ init()
 	fprintf(init_file, "[global]\n");
 	fprintf(init_file, "policy = %s\n", POLICY);
 	fprintf(init_file, "type = bin\n");
+	fprintf(init_file, "compiler = gcc\n");
 	fprintf(init_file, "headers = include\n");
 	fprintf(init_file, "src = src\n");
 	fprintf(init_file, "out = project\n");
@@ -64,6 +65,18 @@ create_cpm_modules()
 	int result = mkdir("./cpm_modules", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
 		error("Could not create `cpm_modules` directory\n");
+		exit(1);
+	}
+
+	result = mkdir("./cpm_modules/lib", S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		error("Could not create `cpm_modules/lib` directory\n");
+		exit(1);
+	}
+
+	result = mkdir("./cpm_modules/include", S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		error("Could not create `cpm_modules/include` directory\n");
 		exit(1);
 	}
 }

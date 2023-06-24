@@ -60,6 +60,7 @@ typedef struct {
 	// Global
 	u_int8_t policy_version;	// Policy version of config
 	OUTPUT_TYPE type;
+	char compiler[STR_MAX];
 
 	char header_paths[PATH_LEN_MAX][HDR_NUM_MAX];
 	int n_headeer_paths;

@@ -9,18 +9,18 @@
 /*
 
 CLI:
-$ cpm --help, cpm -?
 $ cpm --version, cpm -v
+$ cpm --help, cpm -h
 $ cpm --init, cpm -x
 $ cpm --add <pkg>:<vers> ..., cpm -a <pkg>:<ver> ...
 $ cpm --find <pkg>:<ver> ..., cpm -f <pkg>:<ver> ...
 $ cpm --ld <pkg>:<ver> ..., cpm -l <pkg>:<ver> ...
 $ cpm --remove <pkg> ..., cpm -r <pkg> ...
 $ cpm --clean, cpm -c // Cleans out any package binaries that are no longer dependent on
+$ cpm --build, cpm -b
 $ cpm --update <pkg> ... // Updates according to version format mention in cpm.build
 $ cpm --global --add <pkg>:<vers> ..., cpm -g -a <pkg>:<ver> ...
 $ cpm build
-$ cpm run
 
 */
 

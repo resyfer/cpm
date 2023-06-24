@@ -43,6 +43,7 @@ dependents = <count>
 
 #include <args.h>
 #include <config.h>
+#include <build.h>
 #include <help.h>
 #include <init.h>
 #include <version.h>
@@ -65,6 +66,10 @@ main(int argc, char **argv)
 		init();
 	} else {
 		load_config();
+	}
+
+	if(arguments.build) {
+		build();
 	}
 
 	return 0;
