@@ -21,7 +21,7 @@ init()
 
 	FILE *init_file;
 
-	init_file = fopen(".cpm", "w");
+	init_file = fopen(CONFIG_FILE_NAME, "w");
 
 	fprintf(init_file, "[global]\n");
 	fprintf(init_file, "policy = %s\n", POLICY);
@@ -48,7 +48,7 @@ init_file_exists()
 	FILE *init_file;
 	bool is_init_file_exist = false;
 
-	init_file = fopen(".cpm", "r");
+	init_file = fopen(CONFIG_FILE_NAME, "r");
 
 	if (init_file) {
 		is_init_file_exist = true;
@@ -62,21 +62,41 @@ init_file_exists()
 static void
 create_cpm_modules()
 {
-	int result = mkdir("./cpm_modules", S_IRWXU | S_IRWXG | S_IRWXO);
+	int result = mkdir("./" CPM_DIRECTORY, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `cpm_modules` directory\n");
+		error("Could not create `" CPM_DIRECTORY "` directory\n");
 		exit(1);
 	}
 
-	result = mkdir("./cpm_modules/lib", S_IRWXU | S_IRWXG | S_IRWXO);
+	result = mkdir("./" CPM_DIRECTORY "/lib", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `cpm_modules/lib` directory\n");
+		error("Could not create `" CPM_DIRECTORY "/lib` directory\n");
 		exit(1);
 	}
 
-	result = mkdir("./cpm_modules/include", S_IRWXU | S_IRWXG | S_IRWXO);
+	result =
+	    mkdir("./" CPM_DIRECTORY "/.cache", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `cpm_modules/include` directory\n");
+		error("Could not create `" CPM_DIRECTORY
+		      "/.cache` directory\n");
 		exit(1);
 	}
+
+	result =
+	    mkdir("./" CPM_DIRECTORY "/build", S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		error("Could not create `" CPM_DIRECTORY "/build` directory\n");
+		exit(1);
+	}
+
+	result =
+	    mkdir("./" CPM_DIRECTORY "/include", S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		error("Could not create `" CPM_DIRECTORY
+		      "/include` directory\n");
+		exit(1);
+	}
+	// Add to .gitignore
+	system("echo \"\n" CONFIG_FILE_NAME "\n" CPM_DIRECTORY
+	       "\" >> .gitignore");
 }

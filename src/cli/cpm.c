@@ -68,7 +68,7 @@ main(int argc, char **argv)
 		load_config();
 	}
 
-	if(arguments.build) {
+	if (arguments.build) {
 		build();
 	}
 

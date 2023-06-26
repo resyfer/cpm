@@ -21,3 +21,11 @@ str_rst(char *str)
 	while (str[i])
 		str[i++] = 0;
 }
+
+bool
+str_ends_with(const char *string, const char *pattern)
+{
+	int str_len = strlen(string), pat_len = strlen(pattern);
+	return !strncmp(string + (str_len - pat_len), pattern,
+			MIN(str_len, pat_len));
+}

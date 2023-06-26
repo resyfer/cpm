@@ -11,16 +11,18 @@
 #define POLICY "1"
 
 #define STR_MAX 2048
+#define LONG_STR_MAX 2 * STR_MAX
 #define PATH_LEN_MAX 260	// Windows limit
 #define SRC_NUM_MAX 256
 #define HDR_NUM_MAX 256
 #define DEPS_NUM_MAX 512
 #define VERS_NUM_MAX 512
-
 #define PKG_NAME_LEN_MAX 128
 #define BRANCH_NAME_LEN_MAX 256
+#define BUILD_FILES_MAX 512
 
-#define CONFIG_FILE_NAME ".cpm"
+#define CONFIG_FILE_NAME "cpm.build"
+#define CPM_DIRECTORY "cpm_modules"
 
 #define MAX_POLICY_VERSION 1
 
@@ -37,6 +39,12 @@ typedef enum {
 	MINOR_FIXES_ONLY,	// Only updates the package for minor fixes or patches
 	LATEST,			// Always latest version
 } VERSION_UPDATE_POLICY;
+
+typedef enum {
+	REGULAR_FILE,
+	DIRECTORY,
+	UNKNOWN
+} FILE_TYPE;
 
 typedef enum {
 	LIB_STATIC,
@@ -60,12 +68,12 @@ typedef struct {
 	// Global
 	u_int8_t policy_version;	// Policy version of config
 	OUTPUT_TYPE type;
-	char compiler[STR_MAX];
+	char compiler[PATH_LEN_MAX];
 
-	char header_paths[PATH_LEN_MAX][HDR_NUM_MAX];
+	char header_paths[HDR_NUM_MAX][PATH_LEN_MAX];
 	int n_headeer_paths;
 
-	char src_paths[PATH_LEN_MAX][HDR_NUM_MAX];
+	char src_paths[HDR_NUM_MAX][PATH_LEN_MAX];
 	int n_src_paths;
 
 	char output_file[PATH_LEN_MAX - 4];	// '.exe' has size 4
