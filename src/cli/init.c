@@ -75,14 +75,6 @@ create_cpm_modules()
 	}
 
 	result =
-	    mkdir("./" CPM_DIRECTORY "/.cache", S_IRWXU | S_IRWXG | S_IRWXO);
-	if (result) {
-		error("Could not create `" CPM_DIRECTORY
-		      "/.cache` directory\n");
-		exit(1);
-	}
-
-	result =
 	    mkdir("./" CPM_DIRECTORY "/build", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
 		error("Could not create `" CPM_DIRECTORY "/build` directory\n");
