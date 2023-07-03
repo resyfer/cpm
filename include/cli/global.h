@@ -24,6 +24,9 @@
 #define CONFIG_FILE_NAME "cpm.build"
 #define CPM_DIRECTORY "cpm_modules"
 
+#define PREPROCESSOR "cpp"	// Temporary, should be moved into config
+#define LINKER "gcc"		// Temporary, should be moved into config
+
 #define MAX_POLICY_VERSION 1
 
 // Config

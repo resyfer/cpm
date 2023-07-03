@@ -11,8 +11,6 @@
 #include <unistd.h>
 #include <utils.h>
 
-static FILE_TYPE get_path_type(const char path[PATH_LEN_MAX]);
-
 typedef struct {
 
 	char file[PATH_LEN_MAX];
@@ -23,113 +21,125 @@ typedef struct {
 
 } dependency_node_t;
 
+static void get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
+			     char *include_str);
+static void get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX],
+				  int *n_deps, char path[PATH_LEN_MAX],
+				  char build_path[PATH_LEN_MAX],
+				  const char *include_str);
+static void set_header_str(char **include);
+static void to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
+			   bool build_idx_queue[SRC_NUM_MAX]);
+static void add_to_build_queue(bool build_idx_queue[SRC_NUM_MAX],
+			       const int deps_idx);
+
+static void process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX],
+					  int *n_deps, char path[PATH_LEN_MAX],
+					  char build_path[PATH_LEN_MAX],
+					  FILE * output);
+static void linker(dependency_node_t deps[SRC_NUM_MAX], int n_deps);
+
 void
-process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-			      char path[PATH_LEN_MAX],
-			      char build_path[PATH_LEN_MAX], FILE *output)
+build()
 {
+	dependency_node_t deps[SRC_NUM_MAX];
+	char *include_str = NULL;
 
-	char c;
+	set_header_str(&include_str);
 
-	const int path_len = strlen(path);
-	char temp_path[PATH_LEN_MAX] = { 0 };
-	int idx_temp_path = 0;
+	int n_deps = 0;
+	memset(&deps, 0, SRC_NUM_MAX * sizeof(dependency_node_t));
 
-	int space_count = 0;
+	get_dependencies(deps, &n_deps, include_str);
 
-	// Find dependent in deps array
-	bool dependent_found = false;
-	int dependent_found_idx = -1;
-	for (int i = 0; i < *n_deps; i++) {
-		if (!strcmp(deps[i].file, path)) {
-			dependent_found = true;
-			dependent_found_idx = i;
-			break;
-		}
-	}
+	bool build_idx_queue[SRC_NUM_MAX];
+	memset(&build_idx_queue, 0, SRC_NUM_MAX * sizeof(bool));
 
-	if (!dependent_found) {
-		strncpy(deps[*n_deps].file, path, PATH_LEN_MAX);
-		dependent_found_idx = *n_deps;
-		(*n_deps)++;
-	}
+	to_build_files(deps, n_deps, build_idx_queue);
 
-	if (path_len >= 2 && !strcmp(path + (path_len - 2), ".c")) {
-		strncpy(deps[dependent_found_idx].build_file, build_path,
-			PATH_LEN_MAX);
-		deps[dependent_found_idx].
-		    build_file[strlen(deps[dependent_found_idx].build_file) -
-			       1] = 'o';
-	}
+	// Build
+	logger("Building...\n");
 
-	while (1) {
-
-		c = fgetc(output);
-
-		// Start parsing only from 2nd space
-		if (space_count < 2) {
-			if (c == ' ')
-				space_count++;
-			continue;
-		}
-
-		if (c == '\\' || c == '\n') {
-			continue;
-		}
-		// File path finished, now inserting into deps
-		if (c == ' ' || c == EOF) {
-
-			// Find depdency in deps array
-			bool dependency_found = false;
-			int dependency_found_idx = -1;
-			for (int i = 0; i < *n_deps; i++) {
-				if (!strcmp(deps[i].file, temp_path)) {
-					dependency_found = true;
-					dependency_found_idx = i;
-					break;
-				}
+	for (int i = 0; i < n_deps; i++) {
+		if (!build_idx_queue[i]) {
+			if (deps[i].build_file[0] != 0) {
+				logger("File up-to-date: %s\n", deps[i].file);
 			}
-
-			if (!dependency_found) {
-				strncpy(deps[*n_deps].file, temp_path,
-					PATH_LEN_MAX);
-				// Build file value taken care of later when it's a depdendent
-				dependency_found_idx = *n_deps;
-				(*n_deps)++;
-			}
-
-			deps[dependency_found_idx].
-			    dependents[deps[dependency_found_idx].
-				       n_dependents++] = dependent_found_idx;
-
-			memset(&temp_path, 0, PATH_LEN_MAX);
-			idx_temp_path = 0;
-
-			if (c == EOF) {
-				break;
-			}
-
 			continue;
+		} else {
+			logger("Building file: %s\n", deps[i].file);
 		}
 
-		if (idx_temp_path == PATH_LEN_MAX) {
-			error("Path too long. Only %s could be parsed",
-			      temp_path);
+		char build_str[LONG_STR_MAX] = { 0 };
+		snprintf(build_str, LONG_STR_MAX - 1, "%s %s -c %s -o %s",
+			 config.compiler, include_str, deps[i].file,
+			 deps[i].build_file);
+
+		if (system(build_str)) {
+			error("Could not build: %s\n", deps[i].file);
 			exit(1);
 		}
 
-		temp_path[idx_temp_path++] = c;
+	}
 
+	//Linking
+	linker(deps, n_deps);
+
+	if (include_str) {
+		free(include_str);
+	}
+
+	logger("Done! Build file written to: %s\n", config.output_file);
+}
+
+//----------------------------------
+
+static void
+set_header_str(char **include)
+{
+
+	logger("Generating include string...\n");
+
+	char *include_str = NULL;
+	int include_str_size = 0;
+
+	for (int i = 0; i < config.n_headeer_paths; i++) {
+		int header_path_len = strlen(config.header_paths[i]);
+		include_str =
+		    realloc(include_str,
+			    include_str_size + header_path_len + 6);
+
+		sprintf(include_str + include_str_size, " -I./%s",
+			config.header_paths[i]);
+		include_str_size += header_path_len + 5;
+		include_str[include_str_size] = 0;
+	}
+
+	*include = include_str;
+}
+
+//----------------------------------
+
+static void
+get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
+		 char *include_str)
+{
+	char build_path[PATH_LEN_MAX] = { 0 };
+	strncpy(build_path, "./" CPM_DIRECTORY "/build", PATH_LEN_MAX);
+
+	for (int i = 0; i < config.n_src_paths; i++) {
+		get_file_dependencies(deps, n_deps, config.src_paths[i],
+				      build_path, include_str);
 	}
 }
 
-void
+static void
 get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 		      char path[PATH_LEN_MAX], char build_path[PATH_LEN_MAX],
 		      const char *include_str)
 {
 
-	FILE_TYPE type = get_path_type(path);
+	FILE_TYPE type = cpm_get_path_type(path);
 	DIR *dir = NULL;
 	struct dirent *directory_entry;
 	char preprocessor_command[LONG_STR_MAX] = { 0 };
@@ -139,8 +149,8 @@ get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 
 	case REGULAR_FILE:
 
-		snprintf(preprocessor_command, LONG_STR_MAX, "cpp -MM %s %s",
-			 include_str, path);
+		snprintf(preprocessor_command, LONG_STR_MAX,
+			 PREPROCESSOR " -MM %s %s", include_str, path);
 
 		FILE *output = popen(preprocessor_command, "r");
 
@@ -203,56 +213,120 @@ get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 
 }
 
-void
-get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-		 char *include_str)
+static void
+process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
+			      char path[PATH_LEN_MAX],
+			      char build_path[PATH_LEN_MAX], FILE *output)
 {
-	char build_path[PATH_LEN_MAX] = { 0 };
-	strncpy(build_path, "./" CPM_DIRECTORY "/build", PATH_LEN_MAX);
 
-	for (int i = 0; i < config.n_src_paths; i++) {
-		get_file_dependencies(deps, n_deps, config.src_paths[i],
-				      build_path, include_str);
+	char c;
+
+	const int path_len = strlen(path);
+	char temp_path[PATH_LEN_MAX] = { 0 };
+	int idx_temp_path = 0;
+
+	int space_count = 0;
+
+	// Find dependent in deps array
+	bool dependent_found = false;
+	int dependent_found_idx = -1;
+	for (int i = 0; i < *n_deps; i++) {
+		if (!strcmp(deps[i].file, path)) {
+			dependent_found = true;
+			dependent_found_idx = i;
+			break;
+		}
+	}
+
+	if (!dependent_found) {
+		strncpy(deps[*n_deps].file, path, PATH_LEN_MAX);
+		dependent_found_idx = *n_deps;
+		(*n_deps)++;
+	}
+
+	if (path_len >= 2 && !strcmp(path + (path_len - 2), ".c")) {
+		strncpy(deps[dependent_found_idx].build_file, build_path,
+			PATH_LEN_MAX);
+		deps[dependent_found_idx].build_file[strlen
+						     (deps
+						      [dependent_found_idx].build_file)
+						     - 1] = 'o';
+	}
+
+	while (1) {
+
+		c = fgetc(output);
+
+		// Start parsing only from 2nd space
+		if (space_count < 2) {
+			if (c == ' ')
+				space_count++;
+			continue;
+		}
+
+		if (c == '\\' || c == '\n') {
+			continue;
+		}
+		// File path finished, now inserting into deps
+		if (c == ' ' || c == EOF) {
+
+			// Find depdency in deps array
+			bool dependency_found = false;
+			int dependency_found_idx = -1;
+			for (int i = 0; i < *n_deps; i++) {
+				if (!strcmp(deps[i].file, temp_path)) {
+					dependency_found = true;
+					dependency_found_idx = i;
+					break;
+				}
+			}
+
+			if (!dependency_found) {
+				strncpy(deps[*n_deps].file, temp_path,
+					PATH_LEN_MAX);
+				// Build file value taken care of later when it's a depdendent
+				dependency_found_idx = *n_deps;
+				(*n_deps)++;
+			}
+
+			deps[dependency_found_idx].dependents[deps
+							      [dependency_found_idx].
+							      n_dependents++]
+			    = dependent_found_idx;
+
+			memset(&temp_path, 0, PATH_LEN_MAX);
+			idx_temp_path = 0;
+
+			if (c == EOF) {
+				break;
+			}
+
+			continue;
+		}
+
+		if (idx_temp_path == PATH_LEN_MAX) {
+			error("Path too long. Only %s could be parsed",
+			      temp_path);
+			exit(1);
+		}
+
+		temp_path[idx_temp_path++] = c;
+
 	}
 }
 
-void
-add_to_build_queue(bool build_idx_queue[SRC_NUM_MAX], const int deps_idx)
+//----------------------------------
+
+static void
+to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
+	       bool build_idx_queue[SRC_NUM_MAX])
 {
-	build_idx_queue[deps_idx] = true;
-}
 
-void
-build()
-{
-	// Setting header include string
-	char *include_str = NULL;
-	int include_str_size = 0;
-	for (int i = 0; i < config.n_headeer_paths; i++) {
-		int header_path_len = strlen(config.header_paths[i]);
-		include_str =
-		    realloc(include_str,
-			    include_str_size + header_path_len + 6);
-
-		sprintf(include_str + include_str_size, " -I./%s",
-			config.header_paths[i]);
-		include_str_size += header_path_len + 5;
-		include_str[include_str_size] = 0;
-	}
-
-	dependency_node_t deps[SRC_NUM_MAX];
-	int n_deps = 0;
-	memset(&deps, 0, SRC_NUM_MAX * sizeof(dependency_node_t));
-
-	get_dependencies(deps, &n_deps, include_str);
-
-	bool build_idx_queue[SRC_NUM_MAX];
-	memset(&build_idx_queue, 0, SRC_NUM_MAX * sizeof(bool));
+	logger("Reteiving build files...\n");
 
 	for (int i = 0; i < n_deps; i++) {
 
 		if (deps[i].build_file[0] == 0) {
-
 			// Build file
 
 			// Build files have only source files as dependents.
@@ -321,76 +395,37 @@ build()
 		}
 
 	}
+}
 
-	logger("Files to build\n");
+static void
+add_to_build_queue(bool build_idx_queue[SRC_NUM_MAX], const int deps_idx)
+{
+	build_idx_queue[deps_idx] = true;
+}
+
+//----------------------------------
+
+static void
+linker(dependency_node_t deps[SRC_NUM_MAX], int n_deps)
+{
+
+	char linker_str[LONG_STR_MAX] = { 0 };
+	char *linker_str_idx = NULL;
+
+	logger("Linking...\n");
+
+	linker_str_idx = linker_str;
+	linker_str_idx += snprintf(linker_str_idx, PATH_LEN_MAX, LINKER);	// Adding linker command
+
 	for (int i = 0; i < n_deps; i++) {
-		if (!build_idx_queue[i]) {
-			continue;
-		}
+		linker_str_idx += snprintf(linker_str_idx, PATH_LEN_MAX, " %s", deps[i].build_file);	// Adding object files
 	}
 
-	// Build
-	char compiling_str[LONG_STR_MAX] = { 0 };
-	char *compiling_str_idx = compiling_str;
-	compiling_str_idx += snprintf(compiling_str_idx, PATH_LEN_MAX, "gcc");
+	linker_str_idx += snprintf(linker_str_idx, PATH_LEN_MAX, " -o %s", config.output_file);	// Specifying output
 
-	logger("Building\n");
-
-	for (int i = 0; i < n_deps; i++) {
-		compiling_str_idx +=
-		    snprintf(compiling_str_idx, PATH_LEN_MAX, " %s",
-			     deps[i].build_file);
-
-		if (!build_idx_queue[i]) {
-			if (deps[i].build_file[0] != 0) {
-				logger("File up-to-date: %s\n", deps[i].file);
-			}
-			continue;
-		} else {
-			logger("Building file: %s\n", deps[i].file);
-		}
-
-		char build_str[LONG_STR_MAX] = { 0 };
-		snprintf(build_str, LONG_STR_MAX - 1, "%s %s -c %s -o %s",
-			 config.compiler, include_str, deps[i].file,
-			 deps[i].build_file);
-
-		if (system(build_str)) {
-			error("Could not build: %s\n", deps[i].file);
-			exit(1);
-		}
-
-	}
-
-	//Linking
-	logger("Linking\n");
-	compiling_str_idx +=
-	    snprintf(compiling_str_idx, PATH_LEN_MAX, " -o %s",
-		     config.output_file);
-
-	if (system(compiling_str)) {
+	if (system(linker_str)) {
 		error("Could not link: %s\n", config.output_file);
 		exit(1);
 	}
 
-	if (include_str) {
-		free(include_str);
-	}
-
-	logger("Done\n");
-}
-
-static FILE_TYPE
-get_path_type(const char path[PATH_LEN_MAX])
-{
-	struct stat fstat;
-	stat(path, &fstat);
-
-	if (S_ISREG(fstat.st_mode)) {
-		return REGULAR_FILE;
-	} else if (S_ISDIR(fstat.st_mode)) {
-		return DIRECTORY;
-	} else {
-		return UNKNOWN;
-	}
 }

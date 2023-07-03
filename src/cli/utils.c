@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <global.h>
 #include <utils.h>
@@ -28,4 +29,19 @@ str_ends_with(const char *string, const char *pattern)
 	int str_len = strlen(string), pat_len = strlen(pattern);
 	return !strncmp(string + (str_len - pat_len), pattern,
 			MIN(str_len, pat_len));
+}
+
+FILE_TYPE
+cpm_get_path_type(const char path[PATH_LEN_MAX])
+{
+	struct stat fstat;
+	stat(path, &fstat);
+
+	if (S_ISREG(fstat.st_mode)) {
+		return REGULAR_FILE;
+	} else if (S_ISDIR(fstat.st_mode)) {
+		return DIRECTORY;
+	} else {
+		return UNKNOWN;
+	}
 }
