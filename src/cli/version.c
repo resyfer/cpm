@@ -5,5 +5,7 @@
 void
 cpm_version()
 {
+	/* *INDENT-OFF* */
 	printf("%s %s\n", PROJECT, VERSION);
+	/* *INDENT-ON* */
 }

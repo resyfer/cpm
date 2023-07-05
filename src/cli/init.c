@@ -1,13 +1,17 @@
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <sys/stat.h>
 
 #include <init.h>
 #include <global.h>
-#include <sys/stat.h>
+#include <utils.h>
 
 static bool init_file_exists();
 static void create_cpm_modules();
+static void create_global_store();
 
 void
 cpm_init()
@@ -60,8 +64,74 @@ init_file_exists()
 }
 
 static void
+create_global_store()
+{
+	int result = 0;
+
+	// Check
+	cpm_logger("Checking global store...\n");
+
+	DIR *global_store_dir = opendir(CPM_GLOBAL_STORE);
+	if (global_store_dir) {
+		cpm_logger
+		    ("Global store already exists. Skipping creation...\n");
+		closedir(global_store_dir);
+		return;
+	}
+	// Create
+	cpm_logger("Global store not found...\n");
+	cpm_logger("Creating global store...");
+
+	char *buf = NULL;
+
+	result = mkdir(CPM_GLOBAL_STORE, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		cpm_error("Could not create `%s` directory\n",
+			  CPM_GLOBAL_STORE);
+		exit(1);
+	}
+
+	buf = cpm_str_heap_cat(CPM_GLOBAL_STORE, "/lib");
+	result = mkdir(buf, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		cpm_error("Could not create `%s/lib` directory\n",
+			  CPM_GLOBAL_STORE);
+		exit(1);
+	}
+	free(buf);
+	buf = NULL;
+
+	buf = cpm_str_heap_cat(CPM_GLOBAL_STORE, "/bin");
+	result = mkdir(buf, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		cpm_error("Could not create `%s/bin` directory\n",
+			  CPM_GLOBAL_STORE);
+		exit(1);
+	}
+	free(buf);
+	buf = NULL;
+
+	buf = cpm_str_heap_cat(CPM_GLOBAL_STORE, "/repos");
+	result = mkdir(buf, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (result) {
+		cpm_error("Could not create `%s/repos` directory\n",
+			  CPM_GLOBAL_STORE);
+		exit(1);
+	}
+	free(buf);
+	buf = NULL;
+
+	cpm_logger("Done!\n");
+}
+
+static void
 create_cpm_modules()
 {
+	create_global_store();
+
+	cpm_logger("Initializing local project...\n");
+
+	// Project Local Folder
 	int result = mkdir("./" CPM_DIRECTORY, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
 		cpm_error("Could not create `" CPM_DIRECTORY "` directory\n");

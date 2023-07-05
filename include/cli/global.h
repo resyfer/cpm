@@ -1,6 +1,7 @@
 #ifndef __CPM_LOBAL_H
 #define __CPM_LOBAL_H
 
+#include <dirent.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
@@ -23,6 +24,8 @@
 
 #define CONFIG_FILE_NAME "cpm.build"
 #define CPM_DIRECTORY "cpm_modules"
+#define CPM_REL_GLOBAL_STORE ".cpm"
+extern char *CPM_GLOBAL_STORE;
 
 #define PREPROCESSOR "cpp"	// Temporary, should be moved into config
 #define LINKER "gcc"		// Temporary, should be moved into config
@@ -94,5 +97,8 @@ typedef struct {
 extern args_t args;
 extern config_t config;
 extern parse_t parse;
+
+void cpm_init_globals();
+void cpm_free_globals();
 
 #endif

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -44,4 +45,14 @@ cpm_get_path_type(const char path[PATH_LEN_MAX])
 	} else {
 		return UNKNOWN;
 	}
+}
+
+char *
+cpm_str_heap_cat(const char *dest, const char *src)
+{
+	int dest_len = strlen(dest);
+	int src_len = strlen(src);
+	char *str = malloc(dest_len + src_len + 1);
+	sprintf(str, "%s%s", dest, src);
+	return str;
 }

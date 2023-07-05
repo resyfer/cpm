@@ -44,6 +44,7 @@ dependents = <count>
 #include <args.h>
 #include <config.h>
 #include <build.h>
+#include <global.h>
 #include <help.h>
 #include <init.h>
 #include <version.h>
@@ -53,6 +54,7 @@ main(int argc, char **argv)
 {
 
 	cpm_parse_cli_args(argc, argv);
+	cpm_init_globals();
 
 	if (arguments.help) {
 		cpm_help();
@@ -71,6 +73,8 @@ main(int argc, char **argv)
 	if (arguments.build) {
 		cpm_build();
 	}
+
+	cpm_free_globals();
 
 	return 0;
 }
