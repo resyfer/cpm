@@ -8,7 +8,7 @@
 static void print_log(const char *prefix, const char *format, va_list args);
 
 void
-warning(const char *format, ...)
+cpm_warning(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -19,7 +19,7 @@ warning(const char *format, ...)
 }
 
 void
-error(const char *format, ...)
+cpm_error(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -30,7 +30,7 @@ error(const char *format, ...)
 }
 
 void
-logger(const char *format, ...)
+cpm_logger(const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);

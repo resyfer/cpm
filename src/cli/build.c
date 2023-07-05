@@ -22,10 +22,10 @@ typedef struct {
 } dependency_node_t;
 
 static void get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-			     char *include_str);
+			     const char *include_str);
 static void get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX],
-				  int *n_deps, char path[PATH_LEN_MAX],
-				  char build_path[PATH_LEN_MAX],
+				  int *n_deps, const char path[PATH_LEN_MAX],
+				  const char build_path[PATH_LEN_MAX],
 				  const char *include_str);
 static void set_header_str(char **include);
 static void to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
@@ -34,13 +34,14 @@ static void add_to_build_queue(bool build_idx_queue[SRC_NUM_MAX],
 			       const int deps_idx);
 
 static void process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX],
-					  int *n_deps, char path[PATH_LEN_MAX],
-					  char build_path[PATH_LEN_MAX],
+					  int *n_deps,
+					  const char path[PATH_LEN_MAX],
+					  const char build_path[PATH_LEN_MAX],
 					  FILE * output);
 static void linker(dependency_node_t deps[SRC_NUM_MAX], int n_deps);
 
 void
-build()
+cpm_build()
 {
 	dependency_node_t deps[SRC_NUM_MAX];
 	char *include_str = NULL;
@@ -58,16 +59,17 @@ build()
 	to_build_files(deps, n_deps, build_idx_queue);
 
 	// Build
-	logger("Building...\n");
+	cpm_logger("Building...\n");
 
 	for (int i = 0; i < n_deps; i++) {
 		if (!build_idx_queue[i]) {
 			if (deps[i].build_file[0] != 0) {
-				logger("File up-to-date: %s\n", deps[i].file);
+				cpm_logger("File up-to-date: %s\n",
+					   deps[i].file);
 			}
 			continue;
 		} else {
-			logger("Building file: %s\n", deps[i].file);
+			cpm_logger("Building file: %s\n", deps[i].file);
 		}
 
 		char build_str[LONG_STR_MAX] = { 0 };
@@ -76,7 +78,7 @@ build()
 			 deps[i].build_file);
 
 		if (system(build_str)) {
-			error("Could not build: %s\n", deps[i].file);
+			cpm_error("Could not build: %s\n", deps[i].file);
 			exit(1);
 		}
 
@@ -89,7 +91,7 @@ build()
 		free(include_str);
 	}
 
-	logger("Done! Build file written to: %s\n", config.output_file);
+	cpm_logger("Done! Build file written to: %s\n", config.output_file);
 }
 
 //----------------------------------
@@ -98,7 +100,7 @@ static void
 set_header_str(char **include)
 {
 
-	logger("Generating include string...\n");
+	cpm_logger("Generating include string...\n");
 
 	char *include_str = NULL;
 	int include_str_size = 0;
@@ -122,7 +124,7 @@ set_header_str(char **include)
 
 static void
 get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-		 char *include_str)
+		 const char *include_str)
 {
 	char build_path[PATH_LEN_MAX] = { 0 };
 	strncpy(build_path, "./" CPM_DIRECTORY "/build", PATH_LEN_MAX);
@@ -135,7 +137,8 @@ get_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 
 static void
 get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-		      char path[PATH_LEN_MAX], char build_path[PATH_LEN_MAX],
+		      const char path[PATH_LEN_MAX],
+		      const char build_path[PATH_LEN_MAX],
 		      const char *include_str)
 {
 
@@ -165,7 +168,7 @@ get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 
 		dir = opendir(path);
 		if (!dir) {
-			warning("Could not open directory: %s", path);
+			cpm_warning("Could not open directory: %s", path);
 			break;
 		}
 
@@ -215,8 +218,8 @@ get_file_dependencies(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 
 static void
 process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
-			      char path[PATH_LEN_MAX],
-			      char build_path[PATH_LEN_MAX], FILE *output)
+			      const char path[PATH_LEN_MAX],
+			      const char build_path[PATH_LEN_MAX], FILE *output)
 {
 
 	char c;
@@ -249,7 +252,8 @@ process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 			PATH_LEN_MAX);
 		deps[dependent_found_idx].build_file[strlen
 						     (deps
-						      [dependent_found_idx].build_file)
+						      [dependent_found_idx].
+						      build_file)
 						     - 1] = 'o';
 	}
 
@@ -290,8 +294,7 @@ process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 			}
 
 			deps[dependency_found_idx].dependents[deps
-							      [dependency_found_idx].
-							      n_dependents++]
+							      [dependency_found_idx].n_dependents++]
 			    = dependent_found_idx;
 
 			memset(&temp_path, 0, PATH_LEN_MAX);
@@ -305,8 +308,8 @@ process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 		}
 
 		if (idx_temp_path == PATH_LEN_MAX) {
-			error("Path too long. Only %s could be parsed",
-			      temp_path);
+			cpm_error("Path too long. Only %s could be parsed",
+				  temp_path);
 			exit(1);
 		}
 
@@ -322,7 +325,7 @@ to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
 	       bool build_idx_queue[SRC_NUM_MAX])
 {
 
-	logger("Reteiving build files...\n");
+	cpm_logger("Reteiving build files...\n");
 
 	for (int i = 0; i < n_deps; i++) {
 
@@ -333,8 +336,8 @@ to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
 
 			struct stat hdr_fstat;
 			if (stat(deps[i].file, &hdr_fstat)) {
-				error("Could not get stats for file: %s\n",
-				      deps[i].file);
+				cpm_error("Could not get stats for file: %s\n",
+					  deps[i].file);
 				exit(1);
 			}
 
@@ -350,8 +353,8 @@ to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
 					    || (hdr_fstat.st_ctim.tv_sec ==
 						src_build_fstat.st_ctim.tv_sec
 						&& hdr_fstat.st_ctim.tv_nsec >
-						src_build_fstat.st_ctim.
-						tv_nsec)) {
+						src_build_fstat.
+						st_ctim.tv_nsec)) {
 						/* Add to build queue */
 					} else {
 						/* No need to add to build queue */
@@ -385,8 +388,8 @@ to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
 					}
 				}
 			} else {
-				error("Could not get stats for file: %s\n",
-				      deps[i].file);
+				cpm_error("Could not get stats for file: %s\n",
+					  deps[i].file);
 				exit(1);
 			}
 
@@ -412,7 +415,7 @@ linker(dependency_node_t deps[SRC_NUM_MAX], int n_deps)
 	char linker_str[LONG_STR_MAX] = { 0 };
 	char *linker_str_idx = NULL;
 
-	logger("Linking...\n");
+	cpm_logger("Linking...\n");
 
 	linker_str_idx = linker_str;
 	linker_str_idx += snprintf(linker_str_idx, PATH_LEN_MAX, LINKER);	// Adding linker command
@@ -424,7 +427,7 @@ linker(dependency_node_t deps[SRC_NUM_MAX], int n_deps)
 	linker_str_idx += snprintf(linker_str_idx, PATH_LEN_MAX, " -o %s", config.output_file);	// Specifying output
 
 	if (system(linker_str)) {
-		error("Could not link: %s\n", config.output_file);
+		cpm_error("Could not link: %s\n", config.output_file);
 		exit(1);
 	}
 

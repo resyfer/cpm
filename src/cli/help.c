@@ -4,9 +4,9 @@
 #include <help.h>
 
 void
-help()
+cpm_help()
 {
-	version();
+	cpm_version();
 	printf("  A C Package Manager\n");
 	printf("\n");
 	printf("Usage:\n");

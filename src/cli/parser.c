@@ -18,7 +18,7 @@
 parse_t parse;
 
 void
-parser()
+cpm_parser()
 {
 	memset(&parse, 0, sizeof(parse_t));
 
@@ -28,14 +28,14 @@ parser()
 
 	int conf_fd = open(CONFIG_FILE_NAME, O_RDONLY);
 	if (conf_fd == -1) {
-		error("Config File Open Error\n");
+		cpm_error("Config File Open Error\n");
 		exit(1);
 	}
 
 	struct stat s;
 
 	if (fstat(conf_fd, &s) != 0) {
-		error("Config Does Not Exist\n");
+		cpm_error("Config Does Not Exist\n");
 		exit(1);
 	}
 
@@ -43,7 +43,7 @@ parser()
 
 	char *file = mmap(NULL, conf_size, PROT_READ, MAP_PRIVATE, conf_fd, 0);
 	if (file == MAP_FAILED) {
-		error("MMap Error\n");
+		cpm_error("MMap Error\n");
 		close(conf_fd);
 		exit(1);
 	}
@@ -114,7 +114,7 @@ parser()
 			table->rows = NULL;
 			table->header = NULL;
 
-			str_rst(buf);
+			cpm_str_rst(buf);
 			buf_idx = 0;
 			i++;
 			while (buf_idx < STR_MAX && i < conf_size
@@ -128,7 +128,7 @@ parser()
 			}
 			i++;
 
-			table->header = str_n_dup(buf, STR_MAX);
+			table->header = cpm_str_n_dup(buf, STR_MAX);
 
 			// COLLECTION
 			while (true) {
@@ -155,7 +155,7 @@ parser()
 				row_t *row = malloc(sizeof(row_t));
 
 				// TEXT (Key)
-				str_rst(buf);
+				cpm_str_rst(buf);
 				buf_idx = 0;
 				while (buf_idx < STR_MAX && i < conf_size
 				       && (file[i] != ' ' && file[i] != '='))
@@ -166,7 +166,7 @@ parser()
 					goto invalid;
 				}
 
-				row->key = str_n_dup(buf, STR_MAX);
+				row->key = cpm_str_n_dup(buf, STR_MAX);
 
 				// {WS}*
 				while (i < conf_size && file[i] == ' ')
@@ -190,7 +190,7 @@ parser()
 					goto invalid;
 				}
 				// TEXT (Value)
-				str_rst(buf);
+				cpm_str_rst(buf);
 				buf_idx = 0;
 				while (buf_idx < STR_MAX && i < conf_size
 				       && !(file[i] == '\n'
@@ -203,7 +203,7 @@ parser()
 					goto invalid;
 				}
 
-				row->value = str_n_dup(buf, STR_MAX);
+				row->value = cpm_str_n_dup(buf, STR_MAX);
 
 				// Appending to table
 				table->n_rows++;
@@ -232,7 +232,7 @@ parser()
  invalid:
 
 	if (is_invalid) {
-		error("Invalid Config\n");
+		cpm_error("Invalid Config\n");
 		exit(1);
 	}
 
@@ -240,12 +240,12 @@ parser()
 #ifdef __unix__
 
 	if (file != MAP_FAILED && munmap(file, conf_size) == -1) {
-		error("MUnmap Error\n");
+		cpm_error("MUnmap Error\n");
 		exit(1);
 	}
 
 	if (conf_fd != -1 && close(conf_fd) == -1) {
-		error("Close Error\n");
+		cpm_error("Close Error\n");
 		exit(1);
 	}
 #elif _WIN32
@@ -265,7 +265,7 @@ parser()
 }
 
 void
-free_parser()
+cpm_free_parser()
 {
 
 	for (int i = 0; i < parse.n_tables; i++) {

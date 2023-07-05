@@ -3,7 +3,7 @@
 #include <version.h>
 
 void
-version()
+cpm_version()
 {
 	printf("%s %s\n", PROJECT, VERSION);
 }

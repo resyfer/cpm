@@ -27,7 +27,7 @@ $ cpm build
 args_t arguments;
 
 void
-parse_cli_args(int argc, char **argv)
+cpm_parse_cli_args(int argc, char **argv)
 {
 	int c, option_index;
 	struct option long_options[] = {

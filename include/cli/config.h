@@ -3,7 +3,7 @@
 
 #include <global.h>
 
-void load_config();
-void write_config();
+void cpm_load_config();
+void cpm_write_config();
 
 #endif

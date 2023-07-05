@@ -25,6 +25,6 @@ typedef struct {
 
 extern args_t arguments;
 
-void parse_cli_args(int argc, char **argv);
+void cpm_parse_cli_args(int argc, char **argv);
 
 #endif

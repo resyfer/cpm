@@ -13,11 +13,11 @@
 config_t config;
 
 void
-load_config()
+cpm_load_config()
 {
 	memset(&config, 0, sizeof(config_t));
 
-	parser();
+	cpm_parser();
 
 	for (int i = 0; i < parse.n_tables; i++) {
 
@@ -36,7 +36,7 @@ load_config()
 
 					if (config.policy_version >
 					    MAX_POLICY_VERSION) {
-						error
+						cpm_error
 						    ("Incorrect policy version: %s",
 						     row->value);
 						exit(1);
@@ -52,7 +52,7 @@ load_config()
 					} else if (!strcmp(row->value, "bin")) {
 						config.type = BINARY;
 					} else {
-						error
+						cpm_error
 						    ("Incorrect type value: %s",
 						     row->value);
 						exit(1);
@@ -72,14 +72,13 @@ load_config()
 					     strtok_r(NULL, ",", &str)) {
 						if (config.n_headeer_paths ==
 						    HDR_NUM_MAX) {
-							error
+							cpm_error
 							    ("Too manu header paths\n");
 							exit(1);
 						}
 
 						strncpy(config.header_paths
-							[config.
-							 n_headeer_paths],
+							[config.n_headeer_paths],
 							token,
 							PATH_LEN_MAX - 1);
 						config.n_headeer_paths++;
@@ -95,7 +94,7 @@ load_config()
 
 						if (config.n_src_paths ==
 						    SRC_NUM_MAX) {
-							error
+							cpm_error
 							    ("Too manu src paths\n");
 							exit(1);
 						}
@@ -111,8 +110,8 @@ load_config()
 					strncpy(config.output_file, row->value,
 						PATH_LEN_MAX - 5);
 				} else {
-					error("Incorrect key value: %s",
-					      row->key);
+					cpm_error("Incorrect key value: %s",
+						  row->key);
 				}
 
 			}
@@ -130,7 +129,7 @@ load_config()
 					    (row->key,
 					     config.deps[k].package_name,
 					     PKG_NAME_LEN_MAX)) {
-						warning
+						cpm_warning
 						    ("Ignoring duplicate dependency: %s",
 						     row->key);
 						goto next;
@@ -142,19 +141,23 @@ load_config()
 
 				char *val = row->value;
 				if (val[0] == '^') {
-					config.deps[config.n_deps].
-					    update_policy = PACTHES_ONLY;
+					config.deps[config.
+						    n_deps].update_policy =
+					    PACTHES_ONLY;
 					val++;
 				} else if (val[0] == '~') {
-					config.deps[config.n_deps].
-					    update_policy = MINOR_FIXES_ONLY;
+					config.deps[config.
+						    n_deps].update_policy =
+					    MINOR_FIXES_ONLY;
 					val++;
 				} else if (val[0] == '*') {
-					config.deps[config.n_deps].
-					    update_policy = LATEST;
+					config.deps[config.
+						    n_deps].update_policy =
+					    LATEST;
 				} else if ('9' >= val[0] && val[0] >= '0') {
-					config.deps[config.n_deps].
-					    update_policy = FIXED;
+					config.deps[config.
+						    n_deps].update_policy =
+					    FIXED;
 				}
 
 				if (config.deps[config.n_deps].update_policy !=
@@ -170,16 +173,19 @@ load_config()
 
 						if (state == 0) {
 							config.deps
-							    [config.n_deps].
-							    version.major = ver;
+							    [config.
+							     n_deps].version.
+							    major = ver;
 						} else if (state == 1) {
 							config.deps
-							    [config.n_deps].
-							    version.minor = ver;
+							    [config.
+							     n_deps].version.
+							    minor = ver;
 						} else if (state == 2) {
 							config.deps
-							    [config.n_deps].
-							    version.patch = ver;
+							    [config.
+							     n_deps].version.
+							    patch = ver;
 						}
 
 						state++;
@@ -209,16 +215,16 @@ load_config()
 
 					if (state == 0) {
 						config.deps
-						    [config.n_deps].
-						    version.major = ver;
+						    [config.n_deps].version.
+						    major = ver;
 					} else if (state == 1) {
 						config.deps
-						    [config.n_deps].
-						    version.minor = ver;
+						    [config.n_deps].version.
+						    minor = ver;
 					} else if (state == 2) {
 						config.deps
-						    [config.n_deps].
-						    version.patch = ver;
+						    [config.n_deps].version.
+						    patch = ver;
 					}
 
 					state++;
@@ -232,18 +238,18 @@ load_config()
 			}
 
 		} else {
-			warning("Incorrect header: %s", table->header);
+			cpm_warning("Incorrect header: %s", table->header);
 			exit(1);
 		}
 
 	}
 
-	free_parser();
+	cpm_free_parser();
 
 }
 
 void
-write_config()
+cpm_write_config()
 {
 
 }

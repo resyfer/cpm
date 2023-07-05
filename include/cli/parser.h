@@ -45,8 +45,8 @@ typedef struct config {
 	size_t n_tables;
 } parse_t;
 
-void parser();
+void cpm_parser();
 
-void free_parser();
+void cpm_free_parser();
 
 #endif

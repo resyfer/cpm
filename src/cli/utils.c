@@ -7,7 +7,7 @@
 #include <utils.h>
 
 char *
-str_n_dup(const char *s, size_t max)
+cpm_str_n_dup(const char *s, size_t max)
 {
 	size_t s_len = strnlen(s, STR_MAX - 1);
 	char *s_dup = calloc(s_len + 1, sizeof(char));
@@ -16,7 +16,7 @@ str_n_dup(const char *s, size_t max)
 }
 
 void
-str_rst(char *str)
+cpm_str_rst(char *str)
 {
 	int i = 0;
 	while (str[i])
@@ -24,7 +24,7 @@ str_rst(char *str)
 }
 
 bool
-str_ends_with(const char *string, const char *pattern)
+cpm_str_ends_with(const char *string, const char *pattern)
 {
 	int str_len = strlen(string), pat_len = strlen(pattern);
 	return !strncmp(string + (str_len - pat_len), pattern,

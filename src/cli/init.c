@@ -10,10 +10,10 @@ static bool init_file_exists();
 static void create_cpm_modules();
 
 void
-init()
+cpm_init()
 {
 	if (init_file_exists()) {
-		warning("Init file already exists\n");
+		cpm_warning("Init file already exists\n");
 		exit(1);
 	}
 
@@ -39,7 +39,7 @@ init()
 	fclose(init_file);
 	init_file = NULL;
 
-	logger("Project initialized\n");
+	cpm_logger("Project initialized\n");
 }
 
 static bool
@@ -64,28 +64,30 @@ create_cpm_modules()
 {
 	int result = mkdir("./" CPM_DIRECTORY, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `" CPM_DIRECTORY "` directory\n");
+		cpm_error("Could not create `" CPM_DIRECTORY "` directory\n");
 		exit(1);
 	}
 
 	result = mkdir("./" CPM_DIRECTORY "/lib", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `" CPM_DIRECTORY "/lib` directory\n");
+		cpm_error("Could not create `" CPM_DIRECTORY
+			  "/lib` directory\n");
 		exit(1);
 	}
 
 	result =
 	    mkdir("./" CPM_DIRECTORY "/build", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `" CPM_DIRECTORY "/build` directory\n");
+		cpm_error("Could not create `" CPM_DIRECTORY
+			  "/build` directory\n");
 		exit(1);
 	}
 
 	result =
 	    mkdir("./" CPM_DIRECTORY "/include", S_IRWXU | S_IRWXG | S_IRWXO);
 	if (result) {
-		error("Could not create `" CPM_DIRECTORY
-		      "/include` directory\n");
+		cpm_error("Could not create `" CPM_DIRECTORY
+			  "/include` directory\n");
 		exit(1);
 	}
 	// Add to .gitignore

@@ -52,24 +52,24 @@ int
 main(int argc, char **argv)
 {
 
-	parse_cli_args(argc, argv);
+	cpm_parse_cli_args(argc, argv);
 
 	if (arguments.help) {
-		help();
+		cpm_help();
 		return 0;
 	} else if (arguments.version) {
-		version();
+		cpm_version();
 		return 0;
 	}
 
 	if (arguments.init) {
-		init();
+		cpm_init();
 	} else {
-		load_config();
+		cpm_load_config();
 	}
 
 	if (arguments.build) {
-		build();
+		cpm_build();
 	}
 
 	return 0;
