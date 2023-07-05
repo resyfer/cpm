@@ -78,7 +78,8 @@ cpm_load_config()
 						}
 
 						strncpy(config.header_paths
-							[config.n_headeer_paths],
+							[config.
+							 n_headeer_paths],
 							token,
 							PATH_LEN_MAX - 1);
 						config.n_headeer_paths++;
@@ -141,23 +142,19 @@ cpm_load_config()
 
 				char *val = row->value;
 				if (val[0] == '^') {
-					config.deps[config.
-						    n_deps].update_policy =
-					    PACTHES_ONLY;
+					config.deps[config.n_deps].
+					    update_policy = PACTHES_ONLY;
 					val++;
 				} else if (val[0] == '~') {
-					config.deps[config.
-						    n_deps].update_policy =
-					    MINOR_FIXES_ONLY;
+					config.deps[config.n_deps].
+					    update_policy = MINOR_FIXES_ONLY;
 					val++;
 				} else if (val[0] == '*') {
-					config.deps[config.
-						    n_deps].update_policy =
-					    LATEST;
+					config.deps[config.n_deps].
+					    update_policy = LATEST;
 				} else if ('9' >= val[0] && val[0] >= '0') {
-					config.deps[config.
-						    n_deps].update_policy =
-					    FIXED;
+					config.deps[config.n_deps].
+					    update_policy = FIXED;
 				}
 
 				if (config.deps[config.n_deps].update_policy !=
@@ -173,19 +170,16 @@ cpm_load_config()
 
 						if (state == 0) {
 							config.deps
-							    [config.
-							     n_deps].version.
-							    major = ver;
+							    [config.n_deps].
+							    version.major = ver;
 						} else if (state == 1) {
 							config.deps
-							    [config.
-							     n_deps].version.
-							    minor = ver;
+							    [config.n_deps].
+							    version.minor = ver;
 						} else if (state == 2) {
 							config.deps
-							    [config.
-							     n_deps].version.
-							    patch = ver;
+							    [config.n_deps].
+							    version.patch = ver;
 						}
 
 						state++;
@@ -215,16 +209,16 @@ cpm_load_config()
 
 					if (state == 0) {
 						config.deps
-						    [config.n_deps].version.
-						    major = ver;
+						    [config.n_deps].
+						    version.major = ver;
 					} else if (state == 1) {
 						config.deps
-						    [config.n_deps].version.
-						    minor = ver;
+						    [config.n_deps].
+						    version.minor = ver;
 					} else if (state == 2) {
 						config.deps
-						    [config.n_deps].version.
-						    patch = ver;
+						    [config.n_deps].
+						    version.patch = ver;
 					}
 
 					state++;

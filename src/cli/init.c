@@ -80,7 +80,7 @@ create_global_store()
 	}
 	// Create
 	cpm_logger("Global store not found...\n");
-	cpm_logger("Creating global store...");
+	cpm_logger("Creating global store...\n");
 
 	char *buf = NULL;
 
@@ -120,8 +120,6 @@ create_global_store()
 	}
 	free(buf);
 	buf = NULL;
-
-	cpm_logger("Done!\n");
 }
 
 static void
