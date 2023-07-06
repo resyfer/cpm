@@ -24,6 +24,7 @@
 
 #define CONFIG_FILE_NAME "cpm.build"
 #define CPM_DIRECTORY "cpm_modules"
+#define CPM_DNS "localhost:5000"	// Temporary, needs to be changed to a DNS
 #define CPM_REL_GLOBAL_STORE ".cpm"
 extern char *CPM_GLOBAL_STORE;
 
