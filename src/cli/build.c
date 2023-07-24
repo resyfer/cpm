@@ -1,14 +1,13 @@
-#include "log.h"
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include <global.h>
 #include <build.h>
-#include <unistd.h>
 #include <utils.h>
 
 typedef struct {
@@ -252,8 +251,7 @@ process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 			PATH_LEN_MAX);
 		deps[dependent_found_idx].build_file[strlen
 						     (deps
-						      [dependent_found_idx].
-						      build_file)
+						      [dependent_found_idx].build_file)
 						     - 1] = 'o';
 	}
 
@@ -294,7 +292,8 @@ process_c_preprocessor_output(dependency_node_t deps[SRC_NUM_MAX], int *n_deps,
 			}
 
 			deps[dependency_found_idx].dependents[deps
-							      [dependency_found_idx].n_dependents++]
+							      [dependency_found_idx].
+							      n_dependents++]
 			    = dependent_found_idx;
 
 			memset(&temp_path, 0, PATH_LEN_MAX);
@@ -353,8 +352,8 @@ to_build_files(dependency_node_t deps[SRC_NUM_MAX], int n_deps,
 					    || (hdr_fstat.st_ctim.tv_sec ==
 						src_build_fstat.st_ctim.tv_sec
 						&& hdr_fstat.st_ctim.tv_nsec >
-						src_build_fstat.
-						st_ctim.tv_nsec)) {
+						src_build_fstat.st_ctim.
+						tv_nsec)) {
 						/* Add to build queue */
 					} else {
 						/* No need to add to build queue */
